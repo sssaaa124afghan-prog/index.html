@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GymPro">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>💪 GymPro V3</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{
+            --p:#ff6b35;--p2:#ff8c5a;--ok:#4ade80;--no:#f87171;--wn:#fbbf24;
+            --bl:#60a5fa;--pu:#a78bfa;--cy:#22d3ee;--pk:#f472b6;
+            --bg1:#0a0a1a;--bg2:#151530;--bg3:#1e1e42;--bg4:#2a2a55;
+            --tx:#eeeef5;--tx2:#8888aa;--bd:rgba(255,107,53,.1);
+            --gg:linear-gradient(135deg,#ff6b35,#ff8c5a);
+            --gok:linear-gradient(135deg,#22c55e,#4ade80);
+            --safe-b:env(safe-area-inset-bottom,0px)
+        }
+        body{font-family:'Cairo',sans-serif;background:var(--bg1);color:var(--tx);min-height:100dvh;overflow-x:hidden;padding-bottom:calc(70px + var(--safe-b))}
+
+        .hdr{background:var(--bg2);padding:12px 16px 10px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--bd)}
+        .hdr-top{display:flex;justify-content:space-between;align-items:center}
+        .hdr h1{font-size:1.1em;font-weight:900;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hdr-sub{font-size:.68em;color:var(--tx2)}
+        .hdr-r{display:flex;gap:6px;align-items:center}
+        .streak{background:rgba(255,107,53,.1);padding:4px 10px;border-radius:14px;font-size:.72em;color:var(--p);font-weight:700}
+        .week-badge{background:rgba(74,222,128,.1);padding:4px 10px;border-radius:14px;font-size:.72em;color:var(--ok);font-weight:700}
+
+        .bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(15,15,30,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd);display:flex;justify-content:space-around;padding:5px 0;padding-bottom:max(5px,var(--safe-b))}
+        .bni{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;width:25%;cursor:pointer;font-size:.57em;color:var(--tx2);font-weight:600;border:none;background:none;font-family:'Cairo'}
+        .bni .ic{font-size:1.4em;transition:.15s}.bni.act{color:var(--p)}.bni.act .ic{transform:scale(1.1)}
+
+        .ctn{max-width:430px;margin:0 auto;padding:10px 12px}
+
+        .card{background:var(--bg2);border-radius:16px;padding:14px;margin-bottom:10px;border:1px solid var(--bd)}
+        .ct{font-size:.88em;font-weight:800;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:6px;padding-bottom:7px;border-bottom:1px solid var(--bd)}
+        .ct .bdg{margin-right:auto;background:rgba(255,107,53,.1);color:var(--p);padding:2px 8px;border-radius:10px;font-size:.67em}
+
+        /* Days */
+        .dscroll{display:flex;gap:6px;overflow-x:auto;padding:4px 0;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+        .dscroll::-webkit-scrollbar{display:none}
+        .dchip{flex-shrink:0;padding:10px 14px;border-radius:14px;background:var(--bg3);border:1.5px solid var(--bd);cursor:pointer;font-family:'Cairo';font-size:.75em;font-weight:600;color:var(--tx2);transition:.2s;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:85px;text-align:center;scroll-snap-align:start;position:relative}
+        .dchip.act{background:var(--gg);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(255,107,53,.3)}
+        .dchip.completed{border-color:var(--ok);background:rgba(74,222,128,.08)}
+        .dchip.completed .dn{color:var(--ok)}
+        .dchip .dn{font-weight:800;font-size:.82em}
+        .dchip .dm{font-size:.58em;opacity:.85}
+        .dchip .done-mark{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--ok);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55em;color:#fff;font-weight:900;box-shadow:0 2px 6px rgba(74,222,128,.4)}
+        .dchip .next-mark{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55em;color:#fff;font-weight:900;animation:pulse 1.5s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.8}}
+
+        /* Completion Celebration */
+        .day-complete{background:linear-gradient(135deg,rgba(74,222,128,.08),rgba(34,197,94,.05));border:1.5px solid rgba(74,222,128,.2);border-radius:16px;padding:16px;margin-bottom:10px;text-align:center}
+        .day-complete .dc-icon{font-size:2.2em;margin-bottom:6px}
+        .day-complete .dc-title{font-size:1em;font-weight:800;color:var(--ok);margin-bottom:4px}
+        .day-complete .dc-sub{font-size:.78em;color:var(--tx2)}
+        .day-complete .dc-next{margin-top:10px;padding:10px;background:rgba(255,107,53,.08);border-radius:12px;font-size:.82em;color:var(--p);font-weight:700;cursor:pointer}
+        .day-complete .dc-next:active{transform:scale(.97)}
+
+        .all-complete{background:linear-gradient(135deg,rgba(255,107,53,.1),rgba(164,94,234,.1));border:2px solid rgba(255,107,53,.25);border-radius:20px;padding:24px 16px;text-align:center;margin-bottom:12px;position:relative;overflow:hidden}
+        .all-complete::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 50%,rgba(255,107,53,.08),transparent 60%);pointer-events:none}
+        .all-complete .ac-icon{font-size:3em;margin-bottom:8px}
+        .all-complete .ac-title{font-size:1.15em;font-weight:900;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+        .all-complete .ac-msg{font-size:.85em;color:var(--tx2);line-height:1.6}
+        .all-complete .ac-quote{margin-top:12px;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:12px;font-size:.82em;color:var(--wn);font-style:italic;font-weight:600}
+        .all-complete .ac-reset{margin-top:12px}
+
+        /* Exercise */
+        .exi{background:var(--bg3);border-radius:14px;padding:11px;margin-bottom:7px;border:1.5px solid rgba(255,255,255,.02);transition:.2s}
+        .exi:active{transform:scale(.98)}
+        .exi.done{border-color:rgba(74,222,128,.2);background:linear-gradient(135deg,rgba(74,222,128,.05),rgba(74,222,128,.02))}
+        .exi.done .exn{color:var(--ok)}
+        .exi.done .done-label{display:flex}
+        .done-label{display:none;align-items:center;gap:4px;background:rgba(74,222,128,.1);color:var(--ok);padding:3px 9px;border-radius:8px;font-size:.66em;font-weight:700;margin-top:5px;width:fit-content}
+
+        .ext{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;gap:5px}
+        .exn{font-weight:700;font-size:.85em;transition:.15s}
+        .exd{font-size:.66em;color:var(--tx2);margin-top:1px}
+        .done-check{width:30px;height:30px;border-radius:9px;border:2px solid var(--bd);background:var(--bg1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex-shrink:0;font-size:.9em}
+        .done-check:active{transform:scale(.88)}
+        .done-check.checked{background:var(--ok);border-color:var(--ok);box-shadow:0 3px 10px rgba(74,222,128,.3)}
+
+        .exi-row{display:flex;gap:5px;align-items:center}
+        .exi-g{flex:1;min-width:0}
+        .exi-g label{display:block;font-size:.6em;color:var(--tx2);margin-bottom:2px;font-weight:600}
+        .prev-box{padding:7px;text-align:center;background:var(--bg1);border-radius:9px;border:2px solid var(--bd);font-weight:700;color:var(--wn);font-size:.82em;min-height:36px;display:flex;align-items:center;justify-content:center}
+        .exi-in{width:100%;padding:8px;border-radius:9px;border:2px solid var(--bd);background:var(--bg1);color:var(--tx);font-family:'Cairo';font-size:.9em;font-weight:700;text-align:center;outline:none;transition:.2s;-webkit-appearance:none}
+        .exi-in:focus{border-color:var(--p)}
+        .exi-in.chg{border-color:var(--ok);background:rgba(74,222,128,.03)}
+        .diff{display:flex;align-items:center;justify-content:center;min-width:40px;height:36px;border-radius:8px;font-size:.7em;font-weight:800;flex-shrink:0}
+        .diff.up{background:rgba(74,222,128,.1);color:var(--ok)}.diff.dn2{background:rgba(248,113,113,.1);color:var(--no)}.diff.eq{background:rgba(136,136,170,.06);color:var(--tx2)}
+        .ex-note{width:100%;margin-top:4px;padding:5px 8px;border-radius:7px;border:1px solid var(--bd);background:var(--bg1);color:var(--tx2);font-family:'Cairo';font-size:.7em;outline:none;resize:none;min-height:26px}
+
+        .warmup-box{background:rgba(255,107,53,.05);border:1px dashed rgba(255,107,53,.15);border-radius:12px;padding:9px 11px;margin-bottom:7px;font-size:.78em;color:var(--tx2);display:flex;align-items:center;gap:7px}
+
+        .comp-bar{background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid var(--bd)}
+        .cb-info{flex:1}
+        .cb-label{font-size:.7em;color:var(--tx2);margin-bottom:3px;font-weight:600}
+        .cb-track{height:7px;background:var(--bg1);border-radius:7px;overflow:hidden}
+        .cb-fill{height:100%;border-radius:7px;background:var(--gg);transition:width .4s}
+        .cb-fill.full{background:var(--gok)}
+        .cb-pct{font-size:1.05em;font-weight:900;color:var(--p);min-width:42px;text-align:center}
+        .cb-pct.full{color:var(--ok)}
+
+        .save-btn{width:100%;padding:13px;border:none;border-radius:14px;background:var(--gg);color:#fff;font-family:'Cairo';font-size:.95em;font-weight:800;cursor:pointer;box-shadow:0 5px 18px rgba(255,107,53,.25);transition:.2s;margin-top:6px}
+        .save-btn:active{transform:scale(.97)}
+
+        .btn{padding:7px 14px;border:none;border-radius:9px;cursor:pointer;font-family:'Cairo';font-size:.76em;font-weight:700;transition:.2s;display:inline-flex;align-items:center;gap:4px}
+        .btn:active{transform:scale(.93)}
+        .btn-p{background:var(--gg);color:#fff}.btn-s{background:rgba(74,222,128,.12);color:var(--ok)}.btn-d{background:rgba(248,113,113,.12);color:var(--no)}.btn-i{background:rgba(96,165,250,.12);color:var(--bl)}.btn-dk{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}.btn-pu{background:rgba(167,139,250,.12);color:var(--pu)}
+        .btn-sm{padding:4px 8px;font-size:.68em;border-radius:6px}
+        .btn-full{width:100%;justify-content:center;padding:12px}
+        .bg2{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+
+        /* History */
+        .hi{display:flex;justify-content:space-between;align-items:center;padding:8px;margin-bottom:4px;background:var(--bg3);border-radius:9px}
+        .hd{font-size:.7em;color:var(--tx2)}.hw{font-weight:800;color:var(--p);font-size:.85em}
+        .hdif{font-size:.68em;font-weight:700;padding:2px 5px;border-radius:5px}
+        .hdif.up{background:rgba(74,222,128,.1);color:var(--ok)}.hdif.dn2{background:rgba(248,113,113,.1);color:var(--no)}
+
+        /* Stats */
+        .sg{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:8px 0}
+        .sc{background:var(--bg3);padding:12px;border-radius:12px;text-align:center}
+        .sc .sn{font-size:1.4em;font-weight:900;color:var(--p)}
+        .sc .sl{font-size:.65em;color:var(--tx2);margin-top:1px}
+        .sc.ok .sn{color:var(--ok)}.sc.wn .sn{color:var(--wn)}.sc.bl .sn{color:var(--bl)}.sc.pu .sn{color:var(--pu)}
+
+        /* Tools */
+        .tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+        .tool-card{background:var(--bg3);border-radius:14px;padding:14px;text-align:center;cursor:pointer;border:1px solid var(--bd);transition:.2s}
+        .tool-card:active{transform:scale(.96);background:var(--bg4)}
+        .tool-card .t-icon{font-size:1.8em;margin-bottom:4px}
+        .tool-card .t-name{font-size:.78em;font-weight:700;color:var(--tx)}
+        .tool-card .t-desc{font-size:.62em;color:var(--tx2)}
+
+        .timer-d{text-align:center;padding:18px;background:var(--bg3);border-radius:16px;margin:8px 0}
+        .timer-t{font-size:3em;font-weight:900;background:var(--gg);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'Courier New',monospace}
+        .timer-btns{display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+
+        .calc-r{text-align:center;padding:14px;background:var(--bg3);border-radius:12px;margin-top:8px}
+        .calc-r .rn{font-size:1.8em;font-weight:900;color:var(--p)}
+
+        /* Muscle Map */
+        .muscle-info{background:var(--bg3);border-radius:12px;padding:12px;margin-top:8px}
+        .muscle-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd);font-size:.82em}
+        .muscle-row:last-child{border:none}
+        .muscle-name{font-weight:700}.muscle-vol{color:var(--p);font-weight:700;font-size:.85em}
+
+        .fi{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+        .fi label{font-weight:600;color:var(--p);font-size:.73em}
+        .fi input,.fi select{padding:9px 11px;border:2px solid var(--bd);border-radius:10px;font-family:'Cairo';font-size:.85em;background:var(--bg1);color:var(--tx);outline:0;-webkit-appearance:none}
+        .fi input:focus{border-color:var(--p)}
+
+        .mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:300;justify-content:center;align-items:flex-end}
+        .mo.act{display:flex}
+        .mdl{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:82vh;overflow-y:auto;border:1px solid var(--bd);padding-bottom:var(--safe-b);animation:sUp .25s ease}
+        @keyframes sUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .mdl-h{width:36px;height:4px;background:var(--bg4);border-radius:4px;margin:8px auto}
+        .mh{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+        .mh h2{color:var(--p);font-size:.92em;font-weight:800}
+        .mx{width:30px;height:30px;border:none;background:rgba(248,113,113,.1);color:var(--no);border-radius:7px;cursor:pointer;font-size:1em}
+        .mb{padding:0 16px 16px}
+
+        .pg{display:none}.pg.act{display:block;animation:fI .15s ease}
+        @keyframes fI{from{opacity:0}to{opacity:1}}
+
+        .tc{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:400;width:92%;max-width:400px;display:flex;flex-direction:column;gap:4px;align-items:center}
+        .tst{padding:10px 16px;border-radius:14px;font-weight:700;font-family:'Cairo';font-size:.82em;text-align:center;width:100%;box-shadow:0 5px 18px rgba(0,0,0,.3);animation:tIn .25s}
+        .tst-s{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+        .tst-e{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
+        .tst-w{background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff}
+        .tst-i{background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff}
+        .tst-p{background:var(--gg);color:#fff}
+        @keyframes tIn{from{transform:translateY(-15px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+        .empty{text-align:center;padding:25px;color:var(--tx2)}.empty h3{font-size:.82em}
+
+        @media print{*{color:#000!important;background:#fff!important}.bnav,.hdr,.btn,.mo,.tc,.no-print,.done-check,.ex-note{display:none!important}body{padding:5px!important}.exi.done{border:2px solid green!important}.done-label{display:flex!important;color:green!important}}
+        ::-webkit-scrollbar{width:0;height:0}
+    </style>
+</head>
+<body>
+<div class="tc" id="toasts"></div>
+
+<div class="hdr">
+    <div class="hdr-top">
+        <div><h1>💪 GymPro</h1><div class="hdr-sub" id="tDate"></div></div>
+        <div class="hdr-r">
+            <div class="week-badge" id="weekBdg">📅 الأسبوع 0/6</div>
+            <div class="streak">🔥 <span id="strk">0</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="ctn">
+    <!-- WORKOUT -->
+    <div class="pg act" id="pg-wo">
+        <div class="card"><div class="ct">📅 اختر التمرين</div><div class="dscroll" id="dayList"></div></div>
+        <div id="celebArea"></div>
+        <div id="compBarArea"></div>
+        <div id="woArea"></div>
+        <div id="sesAct" style="display:none"><button class="save-btn" onclick="saveSes()">💾 حفظ الجلسة</button></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="pg" id="pg-hist">
+        <div class="card"><div class="ct">📊 سجل الأوزان</div>
+            <div class="fi"><label>التمرين</label><select id="hSel" onchange="rHist()"><option value="">-- اختر --</option></select></div>
+            <div id="hContent"></div>
+        </div>
+    </div>
+
+    <!-- TOOLS -->
+    <div class="pg" id="pg-tools">
+        <div class="tool-grid" id="toolGrid"></div>
+        <div id="toolContent"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="pg" id="pg-stats">
+        <div class="card"><div class="ct">📈 إحصائيات</div><div class="sg" id="oStats"></div></div>
+        <div class="card"><div class="ct">💪 حجم التمرين الأسبوعي</div><div id="volInfo"></div></div>
+        <div class="card"><div class="ct">🏆 أرقام قياسية PR</div><div id="prL"></div></div>
+    </div>
+</div>
+
+<div class="bnav no-print">
+    <button class="bni act" onclick="go('wo',this)"><span class="ic">🏋️</span>تمارين</button>
+    <button class="bni" onclick="go('hist',this)"><span class="ic">📊</span>السجل</button>
+    <button class="bni" onclick="go('tools',this)"><span class="ic">🔧</span>أدوات</button>
+    <button class="bni" onclick="go('stats',this)"><span class="ic">📈</span>إحصائيات</button>
+</div>
+
+<div class="mo" id="addMo"><div class="mdl"><div class="mdl-h"></div><div class="mh"><h2>➕</h2><button class="mx" onclick="clM('addMo')">&times;</button></div><div class="mb" id="addMoB"></div></div></div>
+<div class="mo" id="edMo"><div class="mdl"><div class="mdl-h"></div><div class="mh"><h2 id="edMoT">✏️</h2><button class="mx" onclick="clM('edMo')">&times;</button></div><div class="mb" id="edMoB"></div></div></div>
+<div class="mo" id="toolMo"><div class="mdl"><div class="mdl-h"></div><div class="mh"><h2 id="toolMoT">🔧</h2><button class="mx" onclick="clM('toolMo')">&times;</button></div><div class="mb" id="toolMoB"></div></div></div>
+
+<script>
+const K='gymPro_v4';
+let G={days:{},ses:[],bw:[],streak:0,lastWo:null,doneExs:{},completedDays:{}};
+const dayOrder=['pushA','pushB','pullA','pullB','legA','legB'];
+
+const MOTIVATIONAL=[
+"🔥 أنت وحش! كل يوم بتتحسن","💪 القوة مش بس في الحديد.. في الإصرار","🏆 مفيش حاجة اسمها مستحيل","⚡ الألم مؤقت.. النتيجة دائمة","🎯 كل تمرينة بتقربك من هدفك","👊 أنت أقوى مما تفتكر","🌟 الناس العادية بتستسلم.. أنت مش عادي","💥 Push harder than yesterday","🔱 البطل مش اللي مبيوقعش.. البطل اللي بيقوم كل مرة","🦁 أسد الجيم! كمّل","🚀 النجاح عادة.. وأنت بتبنيها","⭐ فخور بيك! أنت أسطورة"
+];
+
+const MY_DAYS={
+pushA:{name:'Push A',muscles:'صدر + كتف + تراي',exercises:[
+{id:'pa0',name:'إحماء',sets:1,reps:'بار فاضي ×12 + 20ك/جنب ×6',isWarmup:true},
+{id:'pa1',name:'Bench Press',sets:4,reps:'10-12',lastW:35,unit:'كجم/جنب'},
+{id:'pa2',name:'Incline DB Press',sets:4,reps:'10-12',lastW:35,unit:'كجم/دمبل'},
+{id:'pa3',name:'Cable Fly',sets:3,reps:'12-15',lastW:7,unit:'بلاطات/جنب'},
+{id:'pa4',name:'Smith OHP',sets:4,reps:'10-12',lastW:30,unit:'كجم/جنب'},
+{id:'pa5',name:'Lateral Raises',sets:4,reps:'12-15',lastW:12.5,unit:'كجم'},
+{id:'pa6',name:'Rope Pushdown',sets:4,reps:'12',lastW:32,unit:'كجم'},
+{id:'pa7',name:'Abs Crunch',sets:3,reps:'12-15',lastW:0,unit:'وزن جسم'}]},
+pushB:{name:'Push B',muscles:'صدر + كتف + تراي',exercises:[
+{id:'pb0',name:'إحماء',sets:1,reps:'إنكلاين خفيف 10-14ك ×12',isWarmup:true},
+{id:'pb1',name:'Incline DB Press',sets:3,reps:'10',lastW:32,unit:'كجم/دمبل'},
+{id:'pb2',name:'Decline Bench',sets:3,reps:'8',lastW:30,unit:'كجم/جنب'},
+{id:'pb3',name:'Low-High Cable Fly',sets:3,reps:'15',lastW:14,unit:'كجم/جنب'},
+{id:'pb4',name:'Seated DB Press',sets:3,reps:'10',lastW:16,unit:'كجم/دمبل'},
+{id:'pb5',name:'Cable Lateral',sets:3,reps:'12',lastW:12,unit:'كجم'},
+{id:'pb6',name:'Skull Crushers',sets:3,reps:'8',lastW:30,unit:'كجم إجمالي'}]},
+pullA:{name:'Pull A',muscles:'ظهر + باي',exercises:[
+{id:'pla0',name:'إحماء',sets:1,reps:'بار فاضي ×10 + خفيف ×5',isWarmup:true},
+{id:'pla1',name:'Deadlift',sets:3,reps:'8',lastW:90,unit:'كجم إجمالي'},
+{id:'pla2',name:'Barbell Row',sets:3,reps:'8',lastW:60,unit:'كجم إجمالي'},
+{id:'pla3',name:'Seated Cable Row',sets:3,reps:'10',lastW:66,unit:'كجم'},
+{id:'pla4',name:'Face Pull',sets:3,reps:'15',lastW:36,unit:'كجم'},
+{id:'pla5',name:'Machine Curl',sets:3,reps:'8',lastW:36,unit:'كجم'},
+{id:'pla6',name:'Hammer Curl',sets:3,reps:'8',lastW:18,unit:'كجم/دمبل'}]},
+pullB:{name:'Pull B',muscles:'ظهر + باي',exercises:[
+{id:'plb0',name:'إحماء',sets:1,reps:'Lat Pulldown خفيف ×15',isWarmup:true},
+{id:'plb1',name:'Pull-Ups',sets:3,reps:'8-9',lastW:0,unit:'وزن جسم'},
+{id:'plb2',name:'T-Bar Row',sets:3,reps:'10',lastW:40,unit:'كجم'},
+{id:'plb3',name:'1-Arm Cable Row',sets:3,reps:'10',lastW:70,unit:'كجم/ذراع'},
+{id:'plb4',name:'Straight-Arm PD',sets:3,reps:'12',lastW:40,unit:'كجم'},
+{id:'plb5',name:'Incline DB Curl',sets:3,reps:'12',lastW:12,unit:'كجم/دمبل'},
+{id:'plb6',name:'Cable Curl',sets:3,reps:'10-12',lastW:41,unit:'كجم'},
+{id:'plb7',name:'Dead Bug',sets:3,reps:'12',lastW:0,unit:'وزن جسم'}]},
+legA:{name:'Leg A',muscles:'رجل أمامي + سمانة',exercises:[
+{id:'la0',name:'إحماء',sets:1,reps:'5-10 دق مشي + سكوات جسم',isWarmup:true},
+{id:'la1',name:'Back Squat',sets:3,reps:'8',lastW:90,unit:'كجم إجمالي'},
+{id:'la2',name:'Leg Press',sets:3,reps:'8-10',lastW:80,unit:'كجم/جنب'},
+{id:'la3',name:'Bulgarian Split',sets:3,reps:'8/رجل',lastW:10,unit:'كجم/يد'},
+{id:'la4',name:'Calf Raises',sets:4,reps:'15',lastW:20,unit:'كجم/جنب'},
+{id:'la5',name:'Reverse Crunch',sets:3,reps:'12-15',lastW:0,unit:'وزن جسم'}]},
+legB:{name:'Leg B',muscles:'رجل خلفي + سمانة',exercises:[
+{id:'lb0',name:'إحماء',sets:1,reps:'مشي/دراجة + سكوات جسم',isWarmup:true},
+{id:'lb1',name:'Back Squat',sets:3,reps:'8',lastW:90,unit:'كجم إجمالي'},
+{id:'lb2',name:'Deadlift/RDL',sets:3,reps:'8',lastW:90,unit:'كجم إجمالي'},
+{id:'lb3',name:'Lying Leg Curl',sets:3,reps:'8',lastW:56,unit:'كجم'},
+{id:'lb4',name:'Hip Thrust',sets:3,reps:'12',lastW:35,unit:'كجم/جنب'},
+{id:'lb5',name:'Seated Calf',sets:4,reps:'15-20',lastW:20,unit:'كجم/جنب'},
+{id:'lb6',name:'Cable Crunch',sets:3,reps:'10-12',lastW:50,unit:'كجم'}]}
+};
+
+document.addEventListener('DOMContentLoaded',()=>{loadD();rDate();rDays();rTools();rStats()});
+
+function loadD(){try{const s=localStorage.getItem(K);if(s)G=JSON.parse(s);if(!G.days||!Object.keys(G.days).length)G.days=JSON.parse(JSON.stringify(MY_DAYS));if(!G.ses)G.ses=[];if(!G.bw)G.bw=[];if(!G.doneExs)G.doneExs={};if(!G.completedDays)G.completedDays={}}catch(e){G.days=JSON.parse(JSON.stringify(MY_DAYS))}}
+function saveD(){localStorage.setItem(K,JSON.stringify(G));try{const r=indexedDB.open('GymDB3',1);r.onupgradeneeded=e=>e.target.result.createObjectStore('d');r.onsuccess=e=>{e.target.result.transaction('d','readwrite').objectStore('d').put(JSON.parse(JSON.stringify(G)),'main')}}catch(e){}}
+
+function rDate(){const d=new Date(),dn=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],mn=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];document.getElementById('tDate').textContent=`${dn[d.getDay()]} ${d.getDate()} ${mn[d.getMonth()]}`}
+function go(n,b){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('act'));document.querySelectorAll('.bni').forEach(x=>x.classList.remove('act'));document.getElementById('pg-'+n).classList.add('act');if(b)b.classList.add('act');if(n==='hist')popHSel();if(n==='stats')rStats();if(n==='tools')rTools()}
+function weekKey(){const d=new Date(),y=d.getFullYear(),w=Math.ceil(((d-new Date(y,0,1))/864e5+new Date(y,0,1).getDay()+1)/7);return y+'-W'+w}
+
+let curDay=null;
+function todayK(){return new Date().toISOString().split('T')[0]}
+function sesKey(dk){return weekKey()+'_'+dk}
+
+function isDayCompleted(dk){const wk=weekKey();return G.completedDays[wk]&&G.completedDays[wk][dk]}
+function getCompletedCount(){const wk=weekKey();if(!G.completedDays[wk])return 0;return Object.values(G.completedDays[wk]).filter(v=>v).length}
+function getNextDay(){const done=G.completedDays[weekKey()]||{};for(let dk of dayOrder){if(!done[dk])return dk}return null}
+function allDaysCompleted(){return getCompletedCount()===dayOrder.length}
+
+function rDays(){
+    const wk=weekKey(),done=G.completedDays[wk]||{},next=getNextDay(),completed=getCompletedCount();
+    document.getElementById('weekBdg').textContent=`📅 ${completed}/${dayOrder.length}`;
+    document.getElementById('strk').textContent=G.streak||0;
+
+    document.getElementById('dayList').innerHTML=dayOrder.map(k=>{
+        const d=G.days[k];if(!d)return'';
+        const isComplete=done[k],isNext=next===k&&!curDay,isActive=curDay===k;
+        return`<div class="dchip ${isActive?'act':''} ${isComplete&&!isActive?'completed':''}" onclick="selDay('${k}')">
+            ${isComplete?'<div class="done-mark">✓</div>':''}
+            ${isNext&&!isComplete?'<div class="next-mark">▶</div>':''}
+            <span class="dn">${d.name}</span><span class="dm">${d.muscles}</span>
+        </div>`}).join('');
+
+    // Check all completed
+    if(allDaysCompleted()&&!curDay){
+        const msg=MOTIVATIONAL[Math.floor(Math.random()*MOTIVATIONAL.length)];
+        document.getElementById('celebArea').innerHTML=`<div class="all-complete">
+            <div class="ac-icon">🏆🔥💪</div>
+            <div class="ac-title">خلصت كل التمارين هالأسبوع!</div>
+            <div class="ac-msg">أنت بطل حقيقي! كمّل على الإيقاع ده وهتوصل</div>
+            <div class="ac-quote">"${msg}"</div>
+            <div class="ac-reset"><button class="btn btn-p btn-full" onclick="resetWeek()">🔄 ابدأ أسبوع جديد</button></div>
+        </div>`;
+    }else{document.getElementById('celebArea').innerHTML=''}
+}
+
+function selDay(k){curDay=k;rDays();rExs();document.getElementById('sesAct').style.display='block'}
+
+function getLastW(exId){const ss=G.ses.filter(s=>s.exs&&s.exs[exId]&&s.exs[exId].w>0).sort((a,b)=>new Date(b.date)-new Date(a.date));return ss.length?ss[0].exs[exId].w:0}
+
+function isDone(exId){const sk=sesKey(curDay);return G.doneExs[sk]&&G.doneExs[sk][exId]}
+
+function toggleDone(exId){
+    const sk=sesKey(curDay);
+    if(!G.doneExs[sk])G.doneExs[sk]={};
+    G.doneExs[sk][exId]=!G.doneExs[sk][exId];
+    saveD();
+    const exi=document.getElementById('exi-'+exId),chk=document.getElementById('chk-'+exId);
+    if(G.doneExs[sk][exId]){exi.classList.add('done');chk.classList.add('checked');chk.innerHTML='✓';if(navigator.vibrate)navigator.vibrate(30);toast('✅ تم التنفيذ','s')}
+    else{exi.classList.remove('done');chk.classList.remove('checked');chk.innerHTML=''}
+    updateCompBar();
+}
+
+function updateCompBar(){
+    if(!curDay)return;
+    const day=G.days[curDay],sk=sesKey(curDay);
+    const total=day.exercises.filter(e=>!e.isWarmup).length;
+    const done=day.exercises.filter(e=>!e.isWarmup&&G.doneExs[sk]&&G.doneExs[sk][e.id]).length;
+    const pct=total?Math.round(done/total*100):0;
+    const full=done===total&&total>0;
+
+    document.getElementById('compBarArea').innerHTML=`<div class="comp-bar">
+        <div class="cb-info"><div class="cb-label">${done}/${total} تمرين</div>
+        <div class="cb-track"><div class="cb-fill ${full?'full':''}" style="width:${pct}%"></div></div></div>
+        <div class="cb-pct ${full?'full':''}">${pct}%</div></div>`;
+
+    if(full&&!isDayCompleted(curDay)){
+        // Mark day as completed
+        const wk=weekKey();if(!G.completedDays[wk])G.completedDays[wk]={};
+        G.completedDays[wk][curDay]=true;
+        G.streak=(G.streak||0)+1;
+        saveD();
+
+        const next=getNextDay();
+        const nextDay=next?G.days[next]:null;
+        const allDone=allDaysCompleted();
+        const msg=MOTIVATIONAL[Math.floor(Math.random()*MOTIVATIONAL.length)];
+
+        if(allDone){
+            toast('🏆 خلصت كل تمارين الأسبوع! أنت أسطورة! 🔥','p');
+            if(navigator.vibrate)navigator.vibrate([100,50,100,50,200]);
+        }else{
+            document.getElementById('celebArea').innerHTML=`<div class="day-complete">
+                <div class="dc-icon">🎉</div>
+                <div class="dc-title">أحسنت! خلصت ${G.days[curDay].name} ✅</div>
+                <div class="dc-sub">"${msg}"</div>
+                ${nextDay?`<div class="dc-next" onclick="selDay('${next}')">▶️ التمرين الجاي: ${nextDay.name} - ${nextDay.muscles}</div>`:''}
+            </div>`;
+            toast('💪 '+G.days[curDay].name+' تم الإنجاز!','s');
+            if(navigator.vibrate)navigator.vibrate([100,50,100]);
+        }
+        rDays();
+    }
+}
+
+function rExs(){
+    const day=G.days[curDay];if(!day)return;const sk=sesKey(curDay);
+    document.getElementById('woArea').innerHTML=`<div class="card"><div class="ct">${day.muscles}<span class="bdg">${day.exercises.filter(e=>!e.isWarmup).length} تمرين</span></div>
+    ${day.exercises.map((ex,i)=>{
+        if(ex.isWarmup)return`<div class="warmup-box"><span>🔥</span><div><strong>إحماء:</strong> ${ex.reps}</div></div>`;
+        const savedW=getLastW(ex.id);const prev=savedW||ex.lastW||0;const unit=ex.unit||'كجم';
+        const dn=G.doneExs[sk]&&G.doneExs[sk][ex.id];
+        return`<div class="exi ${dn?'done':''}" id="exi-${ex.id}">
+            <div class="ext"><div style="flex:1"><div class="exn">${ex.name}</div><div class="exd">${ex.sets}×${ex.reps} | ${unit}</div></div>
+            <div style="display:flex;gap:3px;align-items:center">
+                <div class="done-check ${dn?'checked':''}" id="chk-${ex.id}" onclick="toggleDone('${ex.id}')">${dn?'✓':''}</div>
+                <button class="btn btn-dk btn-sm no-print" onclick="showEdEx('${curDay}',${i})">✏️</button></div></div>
+            <div class="exi-row"><div class="exi-g"><label>⏮️ سابق</label><div class="prev-box">${prev>0?prev:'--'}</div></div>
+            <div class="exi-g"><label>🆕 اليوم</label><input type="number" class="exi-in" id="w-${ex.id}" step="0.5" min="0" inputmode="decimal" oninput="onWC('${ex.id}',${prev})"></div>
+            <div class="diff eq" id="d-${ex.id}">--</div></div>
+            <div class="done-label">✅ تم التنفيذ</div>
+            <textarea class="ex-note no-print" id="n-${ex.id}" placeholder="📝 ملاحظة..." rows="1"></textarea>
+        </div>`}).join('')}</div>`;
+    updateCompBar();
+}
+
+function onWC(id,prev){const inp=document.getElementById('w-'+id),dif=document.getElementById('d-'+id);const v=parseFloat(inp.value)||0,d=Math.round((v-prev)*10)/10;if(v>0){inp.classList.add('chg');dif.className=d>0?'diff up':d<0?'diff dn2':'diff eq';dif.textContent=d>0?'+'+d:d<0?''+d:'='}else{inp.classList.remove('chg');dif.className='diff eq';dif.textContent='--'}}
+
+function saveSes(){
+    if(!curDay)return toast('اختر يوم','e');const day=G.days[curDay],exs={};let has=false;
+    day.exercises.forEach(ex=>{if(ex.isWarmup)return;const w=parseFloat(document.getElementById('w-'+ex.id)?.value)||0;const nt=document.getElementById('n-'+ex.id)?.value||'';if(w>0)has=true;exs[ex.id]={name:ex.name,w,note:nt,unit:ex.unit||'كجم'}});
+    if(!has)return toast('أدخل وزن واحد','w');
+    G.ses.push({id:'s'+Date.now(),dk:curDay,dn:day.name,ms:day.muscles,exs,date:new Date().toISOString(),ds:new Date().toLocaleString('ar-EG')});
+    G.lastWo=todayK();saveD();toast('💾 تم الحفظ!','s');
+    day.exercises.forEach(ex=>{if(ex.isWarmup)return;const inp=document.getElementById('w-'+ex.id);if(inp){inp.value='';inp.classList.remove('chg')}const dif=document.getElementById('d-'+ex.id);if(dif){dif.className='diff eq';dif.textContent='--'}const nt=document.getElementById('n-'+ex.id);if(nt)nt.value=''});
+    rExs();
+}
+
+function resetWeek(){if(!confirm('بدء أسبوع جديد؟ هيتم مسح علامات الإنجاز'))return;const wk=weekKey();G.completedDays[wk]={};const sk=weekKey();for(let dk of dayOrder){const key=sk+'_'+dk;G.doneExs[key]={}}saveD();curDay=null;document.getElementById('woArea').innerHTML='';document.getElementById('compBarArea').innerHTML='';document.getElementById('sesAct').style.display='none';rDays();toast('🔄 أسبوع جديد! يلا 💪','i')}
+
+// History
+function popHSel(){const sel=document.getElementById('hSel'),all={};Object.values(G.days).forEach(d=>d.exercises.forEach(ex=>{if(!ex.isWarmup)all[ex.id]=ex.name}));sel.innerHTML='<option value="">-- اختر --</option>'+Object.entries(all).map(([id,n])=>`<option value="${id}">${n}</option>`).join('')}
+function rHist(){const id=document.getElementById('hSel').value,c=document.getElementById('hContent');if(!id){c.innerHTML='<div class="empty"><h3>اختر تمرين</h3></div>';return}const ss=G.ses.filter(s=>s.exs&&s.exs[id]&&s.exs[id].w>0).sort((a,b)=>new Date(b.date)-new Date(a.date));if(!ss.length){c.innerHTML='<div class="empty"><h3>لا سجل</h3></div>';return}const best=Math.max(...ss.map(s=>s.exs[id].w));c.innerHTML=`<div style="text-align:center;padding:12px;background:var(--bg3);border-radius:12px;margin-bottom:8px"><div style="font-size:.7em;color:var(--tx2)">🏆 أفضل</div><div style="font-size:1.5em;font-weight:900;color:var(--p)">${best}</div></div>${ss.map((s,i)=>{const w=s.exs[id].w,prev=ss[i+1]?ss[i+1].exs[id].w:w,d=Math.round((w-prev)*10)/10;return`<div class="hi"><div><div class="hd">${new Date(s.date).toLocaleDateString('ar-EG',{weekday:'short',month:'short',day:'numeric'})}</div>${s.exs[id].note?`<div style="font-size:.63em;color:var(--tx2)">📝 ${s.exs[id].note}</div>`:''}</div><div style="display:flex;gap:4px;align-items:center"><span class="hw">${w}</span>${d!==0?`<span class="hdif ${d>0?'up':'dn2'}">${d>0?'+':''}${d}</span>`:''}</div></div>`}).join('')}`}
+
+// ===== TOOLS =====
+let activeTool=null;
+function rTools(){
+    document.getElementById('toolGrid').innerHTML=`
+        <div class="tool-card" onclick="openTool('timer')"><div class="t-icon">⏱️</div><div class="t-name">مؤقت الراحة</div><div class="t-desc">Rest Timer</div></div>
+        <div class="tool-card" onclick="openTool('1rm')"><div class="t-icon">🧮</div><div class="t-name">حاسبة 1RM</div><div class="t-desc">أقصى وزن</div></div>
+        <div class="tool-card" onclick="openTool('bw')"><div class="t-icon">⚖️</div><div class="t-name">وزن الجسم</div><div class="t-desc">Body Weight</div></div>
+        <div class="tool-card" onclick="openTool('warmup')"><div class="t-icon">🔥</div><div class="t-name">مولّد الإحماء</div><div class="t-desc">Warmup Sets</div></div>
+        <div class="tool-card" onclick="openTool('plate')"><div class="t-icon">🏋️</div><div class="t-name">حاسبة الأطباق</div><div class="t-desc">Plate Calculator</div></div>
+        <div class="tool-card" onclick="openTool('percent')"><div class="t-icon">📊</div><div class="t-name">نسب الأوزان</div><div class="t-desc">% of 1RM</div></div>
+        <div class="tool-card" onclick="openTool('bmi')"><div class="t-icon">📏</div><div class="t-name">حاسبة BMI</div><div class="t-desc">مؤشر الكتلة</div></div>
+        <div class="tool-card" onclick="openTool('manage')"><div class="t-icon">⚙️</div><div class="t-name">إدارة التمارين</div><div class="t-desc">تعديل/إضافة/حذف</div></div>`;
+}
+
+function openTool(tool){
+    activeTool=tool;const t=document.getElementById('toolMoT'),b=document.getElementById('toolMoB');
+    if(tool==='timer'){t.textContent='⏱️ مؤقت الراحة';b.innerHTML=`<div class="timer-d"><div class="timer-t" id="tmD">01:30</div><div class="timer-btns"><button class="btn btn-dk" onclick="setTm(60)">1:00</button><button class="btn btn-dk" onclick="setTm(90)">1:30</button><button class="btn btn-dk" onclick="setTm(120)">2:00</button><button class="btn btn-dk" onclick="setTm(180)">3:00</button></div><div class="timer-btns" style="margin-top:8px"><button class="btn btn-s" onclick="startTm()" id="tmBtn">▶️ ابدأ</button><button class="btn btn-d" onclick="stopTm()">⏹️</button></div></div>`;upTm()}
+    else if(tool==='1rm'){t.textContent='🧮 حاسبة 1RM';b.innerHTML=`<div style="display:flex;gap:6px"><div class="fi" style="flex:1"><label>الوزن</label><input type="number" id="crW" inputmode="decimal"></div><div class="fi" style="flex:1"><label>العدات</label><input type="number" id="crR" inputmode="numeric"></div></div><button class="btn btn-p btn-full" onclick="c1RM()">احسب</button><div class="calc-r" id="crRes" style="display:none"><div class="rn" id="crN">0</div><div style="font-size:.72em;color:var(--tx2)">أقصى وزن تقديري</div></div>`}
+    else if(tool==='bw'){t.textContent='⚖️ وزن الجسم';b.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:8px"><input type="number" id="bW" placeholder="كجم" step="0.1" inputmode="decimal" style="flex:1;padding:10px;border:2px solid var(--bd);border-radius:10px;background:var(--bg1);color:var(--tx);font-family:'Cairo';font-size:.9em;outline:0;text-align:center"><button class="btn btn-p" onclick="saveBW()">💾</button></div><div id="bwH"></div>`;rBW()}
+    else if(tool==='warmup'){t.textContent='🔥 مولّد الإحماء';b.innerHTML=`<div class="fi"><label>الوزن المستهدف (كجم)</label><input type="number" id="wuTarget" inputmode="decimal" placeholder="80"></div><button class="btn btn-p btn-full" onclick="genWarmup()">ولّد الإحماء</button><div id="wuResult"></div>`}
+    else if(tool==='plate'){t.textContent='🏋️ حاسبة الأطباق';b.innerHTML=`<div class="fi"><label>الوزن المطلوب (كجم) - البار 20 كجم</label><input type="number" id="plW" inputmode="decimal" placeholder="100"></div><button class="btn btn-p btn-full" onclick="calcPlates()">احسب</button><div id="plResult"></div>`}
+    else if(tool==='percent'){t.textContent='📊 نسب الأوزان';b.innerHTML=`<div class="fi"><label>الـ 1RM (كجم)</label><input type="number" id="pctRM" inputmode="decimal" placeholder="100"></div><button class="btn btn-p btn-full" onclick="calcPct()">احسب</button><div id="pctResult"></div>`}
+    else if(tool==='bmi'){t.textContent='📏 BMI';b.innerHTML=`<div style="display:flex;gap:6px"><div class="fi" style="flex:1"><label>الوزن (كجم)</label><input type="number" id="bmiW" inputmode="decimal"></div><div class="fi" style="flex:1"><label>الطول (سم)</label><input type="number" id="bmiH" inputmode="numeric"></div></div><button class="btn btn-p btn-full" onclick="calcBMI()">احسب</button><div class="calc-r" id="bmiRes" style="display:none"><div class="rn" id="bmiN">0</div><div id="bmiCat" style="font-size:.78em;margin-top:4px"></div></div>`}
+    else if(tool==='manage'){t.textContent='⚙️ إدارة';b.innerHTML=`<div class="bg2"><button class="btn btn-p" onclick="clM('toolMo');showAddEx()">➕ تمرين</button><button class="btn btn-i" onclick="clM('toolMo');showAddDay()">📅 يوم</button><button class="btn btn-dk" onclick="expD()">📤 تصدير</button><button class="btn btn-dk" onclick="document.getElementById('impF').click()">📥 استيراد</button><input type="file" id="impF" accept=".json" onchange="impD(event)" style="display:none"><button class="btn btn-dk" onclick="window.print()">🖨️</button></div>`}
+    document.getElementById('toolMo').classList.add('act');
+}
+
+// Timer
+let tmI=null,tmS=90,tmR=false;
+function setTm(s){tmS=s;upTm();if(tmR){clearInterval(tmI);tmR=false;startTm()}}
+function upTm(){const el=document.getElementById('tmD');if(el)el.textContent=`${String(Math.floor(tmS/60)).padStart(2,'0')}:${String(tmS%60).padStart(2,'0')}`}
+function startTm(){if(tmR)return;tmR=true;const btn=document.getElementById('tmBtn');if(btn)btn.textContent='⏸️';tmI=setInterval(()=>{tmS--;upTm();if(tmS<=0){stopTm();if(navigator.vibrate)navigator.vibrate([200,100,200]);toast('⏱️ يلا!','i')}},1000)}
+function stopTm(){clearInterval(tmI);tmR=false;tmS=90;upTm();const btn=document.getElementById('tmBtn');if(btn)btn.textContent='▶️'}
+
+// 1RM
+function c1RM(){const w=parseFloat(document.getElementById('crW').value),r=parseInt(document.getElementById('crR').value);if(!w||!r)return;document.getElementById('crRes').style.display='block';document.getElementById('crN').textContent=Math.round(w*(1+r/30)*10)/10+' كجم'}
+
+// Body Weight
+function saveBW(){const w=parseFloat(document.getElementById('bW').value);if(!w)return;G.bw.push({w,date:new Date().toISOString(),ds:new Date().toLocaleDateString('ar-EG')});saveD();document.getElementById('bW').value='';rBW();toast('⚖️ تم','s')}
+function rBW(){const c=document.getElementById('bwH');if(!c)return;const data=(G.bw||[]).slice(-8).reverse();c.innerHTML=data.length?data.map((d,i)=>{const prev=data[i+1]?data[i+1].w:d.w,diff=Math.round((d.w-prev)*10)/10;return`<div class="hi"><span class="hd">${d.ds}</span><div style="display:flex;gap:4px;align-items:center"><span class="hw">${d.w}</span>${diff!==0?`<span class="hdif ${diff>0?'up':'dn2'}">${diff>0?'+':''}${diff}</span>`:''}</div></div>`}).join(''):'<div class="empty"><h3>سجل وزنك</h3></div>'}
+
+// Warmup Generator
+function genWarmup(){const target=parseFloat(document.getElementById('wuTarget').value);if(!target)return;const sets=[{pct:0,reps:10,label:'بار فاضي'},{pct:40,reps:8},{pct:60,reps:5},{pct:75,reps:3},{pct:85,reps:2},{pct:100,reps:'الشغل'}];document.getElementById('wuResult').innerHTML=`<div style="margin-top:10px">${sets.map(s=>`<div class="hi"><span style="font-weight:700;font-size:.82em">${s.label||Math.round(s.pct)+'%'}</span><div><span class="hw">${s.pct?Math.round(target*s.pct/100):20} كجم</span><span style="font-size:.72em;color:var(--tx2);margin-right:6px">× ${s.reps}</span></div></div>`).join('')}</div>`}
+
+// Plate Calculator
+function calcPlates(){const total=parseFloat(document.getElementById('plW').value);if(!total)return;const perSide=(total-20)/2;const plates=[20,15,10,5,2.5,1.25];let rem=perSide,result=[];plates.forEach(p=>{const count=Math.floor(rem/p);if(count>0){result.push(`${count}× ${p}كجم`);rem-=count*p}});document.getElementById('plResult').innerHTML=`<div style="margin-top:10px;text-align:center"><div style="font-size:.78em;color:var(--tx2)">لكل جنب:</div><div style="font-size:1.1em;font-weight:800;color:var(--p);margin:6px 0">${result.join(' + ')}</div><div style="font-size:.72em;color:var(--tx2)">إجمالي: ${total} كجم (بار 20 + ${perSide}×2)</div></div>`}
+
+// Percentage Table
+function calcPct(){const rm=parseFloat(document.getElementById('pctRM').value);if(!rm)return;const pcts=[100,95,90,85,80,75,70,65,60,55,50];document.getElementById('pctResult').innerHTML=`<div style="margin-top:8px">${pcts.map(p=>`<div class="hi"><span style="font-weight:700;font-size:.82em">${p}%</span><span class="hw">${Math.round(rm*p/100*10)/10} كجم</span></div>`).join('')}</div>`}
+
+// BMI
+function calcBMI(){const w=parseFloat(document.getElementById('bmiW').value),h=parseFloat(document.getElementById('bmiH').value);if(!w||!h)return;const bmi=Math.round(w/((h/100)**2)*10)/10;document.getElementById('bmiRes').style.display='block';document.getElementById('bmiN').textContent=bmi;const cat=bmi<18.5?{t:'نحيف',c:'var(--bl)'}:bmi<25?{t:'طبيعي 👍',c:'var(--ok)'}:bmi<30?{t:'وزن زائد',c:'var(--wn)'}:{t:'سمنة',c:'var(--no)'};document.getElementById('bmiCat').innerHTML=`<span style="color:${cat.c};font-weight:700">${cat.t}</span>`}
+
+// Manage
+function showAddEx(){const sel=Object.entries(G.days).map(([k,d])=>`<option value="${k}">${d.name}</option>`).join('');document.getElementById('addMoB').innerHTML=`<div class="fi"><label>اليوم</label><select id="aDay">${sel}</select></div><div class="fi"><label>التمرين</label><input id="aName"></div><div class="fi"><label>جولات</label><input type="number" id="aSets" value="3"></div><div class="fi"><label>عدات</label><input id="aReps" value="10-12"></div><div class="fi"><label>وحدة</label><input id="aUnit" value="كجم"></div><button class="btn btn-p btn-full" onclick="addEx()">💾</button>`;document.getElementById('addMo').classList.add('act')}
+function addEx(){const dk=document.getElementById('aDay').value,nm=document.getElementById('aName').value.trim();if(!nm)return toast('الاسم','e');G.days[dk].exercises.push({id:'ex'+Date.now(),name:nm,sets:parseInt(document.getElementById('aSets').value)||3,reps:document.getElementById('aReps').value||'12',unit:document.getElementById('aUnit').value||'كجم',lastW:0});saveD();clM('addMo');if(curDay===dk)rExs();toast('➕','s')}
+
+function showEdEx(dk,idx){const ex=G.days[dk].exercises[idx];document.getElementById('edMoT').textContent='✏️ '+ex.name;document.getElementById('edMoB').innerHTML=`<div class="fi"><label>الاسم</label><input id="eName" value="${ex.name}"></div><div class="fi"><label>جولات</label><input type="number" id="eSets" value="${ex.sets}"></div><div class="fi"><label>عدات</label><input id="eReps" value="${ex.reps}"></div><div class="fi"><label>وحدة</label><input id="eUnit" value="${ex.unit||'كجم'}"></div><div class="bg2"><button class="btn btn-p btn-full" onclick="svEdEx('${dk}',${idx})">💾</button><button class="btn btn-d btn-full" onclick="delEx('${dk}',${idx})">🗑️ حذف</button></div>`;document.getElementById('edMo').classList.add('act')}
+function svEdEx(dk,idx){const ex=G.days[dk].exercises[idx];ex.name=document.getElementById('eName').value.trim()||ex.name;ex.sets=parseInt(document.getElementById('eSets').value)||ex.sets;ex.reps=document.getElementById('eReps').value||ex.reps;ex.unit=document.getElementById('eUnit').value||ex.unit;saveD();clM('edMo');if(curDay===dk)rExs();toast('✏️','s')}
+function delEx(dk,idx){if(!confirm('حذف؟'))return;G.days[dk].exercises.splice(idx,1);saveD();clM('edMo');if(curDay===dk)rExs();toast('🗑️','w')}
+
+function showAddDay(){document.getElementById('edMoT').textContent='📅 يوم';document.getElementById('edMoB').innerHTML=`<div class="fi"><label>الاسم</label><input id="ndN"></div><div class="fi"><label>العضلات</label><input id="ndM"></div><button class="btn btn-p btn-full" onclick="addDay()">➕</button><div style="margin-top:10px">${Object.entries(G.days).map(([k,d])=>`<div class="hi"><span style="font-weight:700;font-size:.8em">${d.name}</span><button class="btn btn-d btn-sm" onclick="delDay('${k}')">🗑️</button></div>`).join('')}</div>`;document.getElementById('edMo').classList.add('act')}
+function addDay(){const n=document.getElementById('ndN').value.trim();if(!n)return;const k='d'+Date.now();G.days[k]={name:n,muscles:document.getElementById('ndM').value.trim()||n,exercises:[]};dayOrder.push(k);saveD();rDays();clM('edMo');toast('➕','s')}
+function delDay(k){if(!confirm('حذف؟'))return;delete G.days[k];const i=dayOrder.indexOf(k);if(i>-1)dayOrder.splice(i,1);if(curDay===k){curDay=null;document.getElementById('woArea').innerHTML='';document.getElementById('compBarArea').innerHTML='';document.getElementById('sesAct').style.display='none'}saveD();rDays();toast('🗑️','w')}
+
+// Stats
+function rStats(){
+    const ts=G.ses.length,lw=G.bw.length?G.bw[G.bw.length-1].w:'--',wkDone=getCompletedCount();
+    document.getElementById('oStats').innerHTML=`<div class="sc"><div class="sn">${ts}</div><div class="sl">جلسات كلية</div></div><div class="sc ok"><div class="sn">${G.streak||0}</div><div class="sl">🔥 Streak</div></div><div class="sc wn"><div class="sn">${wkDone}/6</div><div class="sl">أيام الأسبوع</div></div><div class="sc bl"><div class="sn">${lw}</div><div class="sl">⚖️ الوزن</div></div>`;
+
+    // Volume per muscle
+    const vol={};G.ses.slice(-10).forEach(s=>{Object.entries(s.exs||{}).forEach(([id,d])=>{if(d.w>0){if(!vol[d.name])vol[d.name]=0;vol[d.name]+=d.w}})});
+    const volSorted=Object.entries(vol).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    document.getElementById('volInfo').innerHTML=volSorted.length?`<div class="muscle-info">${volSorted.map(([n,v])=>`<div class="muscle-row"><span class="muscle-name">${n}</span><span class="muscle-vol">${v} كجم</span></div>`).join('')}</div>`:'<div class="empty"><h3>ابدأ التمرين عشان تشوف الحجم</h3></div>';
+
+    // PRs
+    const prs={};G.ses.forEach(s=>{Object.entries(s.exs||{}).forEach(([id,d])=>{if(d.w>0&&(!prs[id]||d.w>prs[id].w))prs[id]={name:d.name,w:d.w,unit:d.unit||'كجم',ds:s.ds}})});
+    document.getElementById('prL').innerHTML=Object.values(prs).sort((a,b)=>b.w-a.w).map(p=>`<div class="hi"><div><div style="font-weight:700;font-size:.8em">${p.name}</div><div class="hd">${p.ds}</div></div><span class="hw">🏆 ${p.w}</span></div>`).join('')||'<div class="empty"><h3>لا PRs بعد</h3></div>';
+}
+
+function expD(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(G,null,2)],{type:'application/json'}));a.download=`GymPro_${todayK()}.json`;a.click();toast('📤','s')}
+function impD(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.days&&confirm('استبدال؟')){G=d;saveD();location.reload()}}catch{toast('خطأ','e')}};r.readAsText(f)}
+
+function clM(id){document.getElementById(id).classList.remove('act')}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('act')}));
+function toast(m,t='s'){const c=document.getElementById('toasts'),e=document.createElement('div');e.className='tst tst-'+t;e.textContent=m;c.appendChild(e);setTimeout(()=>{e.style.opacity='0';e.style.transition='.2s';setTimeout(()=>e.remove(),200)},2500)}
+</script>
+</body>
+</html>
